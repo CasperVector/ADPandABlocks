@@ -1,2 +1,1 @@
 BOOST=/usr
-XML2_INCLUDE=-I/usr/include/libxml2

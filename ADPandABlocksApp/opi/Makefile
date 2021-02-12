@@ -1,7 +1,8 @@
 TOP = ../..
 include $(TOP)/configure/CONFIG
 
-DIRS += symbol
 DIRS += edl
 
-include $(TOP)/configure/RULES_DIRS
+include $(CONFIG)/RULES_DIRS
+
+-include $(SUPPORT)/configure/RULES_OPI

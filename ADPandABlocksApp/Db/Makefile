@@ -8,11 +8,8 @@ include $(TOP)/configure/CONFIG
 #DB_OPT = YES
 
 #----------------------------------------------------
-# In a Diamond Support Module, install
-# templates like this
-#
-#DB += motor.template
-#DB += basic_motor.template
+# Create and install (or just install)
+# databases, templates, substitutions like this
 
 DB += ADPandABlocks.template
 DB += ADPandABlocksPosBus.template
@@ -20,15 +17,10 @@ DB += ADPandABlocksMotorSync.template
 DB += ADPandABlocks_detail.template
 
 #----------------------------------------------------
-# In a Diamond IOC Application, build db files from
-# template files like this
-#
-#DB += BL06I-MO-IOC-01.db
-#DB += BL06I-MO-IOC-01_sim.db
-
-#USES_TEMPLATE += $(MOTOR)/db/motor.template
-#USES_TEMPLATE += $(MOTOR)/db/basic_motor.template
+# If <anyname>.db template is not named <anyname>*.template add
+# <anyname>_template = <templatename>
 
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
+

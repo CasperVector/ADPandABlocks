@@ -1,42 +1,33 @@
 TOP=../..
-
 include $(TOP)/configure/CONFIG
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
 
 #USR_CXXFLAGS += -Werror
 USR_CXXFLAGS += -Wall -Wextra
 USR_CXXFLAGS += -Wno-unused-parameter
 USR_CXXFLAGS += -std=c++11
-
-
-# -------------------------------
-# Build an Diamond Support Module
-# -------------------------------
-
-LIBRARY_IOC += ADPandABlocks
-
-# xxxRecord.h will be created from xxxRecord.dbd
-#DBDINC += xxx.h
-
-# xxxRecord.dbd will be installed into <top>/dbd
-#DBD += xxx.dbd
-DBD += ADPandABlocks.dbd
-#DBD += ADPandABlocksMotorSync.dbd
-ADPandABlocks_DBD += base.dbd
-ADPandABlocks_DBD += asyn.dbd
-ADPandABlocks_DBD += ADPandABlockssupport.dbd
-
-# The following are compiled and added to the support library
-#xxx_SRCS += xxxCodeA.c
-ADPandABlocks_SRCS += ADPandABlocks.cpp
-
-# We need to link against the EPICS Base libraries
-#xxx_LIBS += $(EPICS_BASE_IOC_LIBS)
-
-#INC += zebra2Regs.h
-INC += ADPandABlocks.h
-
-
 USR_INCLUDES += $(XML2_INCLUDE)
 
+#======== DETECTOR LIBRARY ==============
 
+# The following gets rid of the -fno-implicit-templates flag on vxWorks, 
+# so we get automatic template instantiation.
+# This is what we want for miscellaneous/asynPortDriver.cpp
+ifeq (vxWorks,$(findstring vxWorks, $(T_A)))
+CODE_CXXFLAGS=
+endif
+
+INC += ADPandABlocks.h
+
+LIBRARY_IOC = ADPandABlocks
+LIB_SRCS += ADPandABlocks.cpp
+
+DBD += ADPandABlocksSupport.dbd
+#DBD += ADPandABlocksMotorSync.dbd
+
+include $(ADCORE)/ADApp/commonLibraryMakefile
 include $(TOP)/configure/RULES
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+
