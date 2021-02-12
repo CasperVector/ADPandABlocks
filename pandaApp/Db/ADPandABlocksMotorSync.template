@@ -1,12 +1,10 @@
 #====================================================================#
-# Template file: ADPandABlocksEnc.template
-#
 # Macros:
 # % macro, MOTOR, pv of motor record
 # % macro, P, Device prefix
 # % macro, R, Device suffix
 # % macro, PORT, asyn port
-# % macro, ENC_IND, index for motor
+# % macro, ADDR, index for motor
 # % macro, DIR, motor direction + for positive - for negative
 # % macro, MULT, scale factor multiply
 # % macro, READONLY, Should screen be read-only
@@ -14,102 +12,102 @@
 #====================================================================#
 
 
-record(calcout, "$(P)$(R)INENC$(ENC_IND):SCALECALC") {
+record(calcout, "$(P)$(R)SCALECALC") {
   field(CALC, "(B=0?A:-A)*(C>0?C:1)*D")
   field(INPA, "$(MOTOR).ERES CP")
   field(INPB, "$(MOTOR).DIR CP")
   field(INPC, "$(MOTOR):SCALE CP")
   field(INPD, "$(DIR=+)$(MULT=1)")
-  field(OUT,  "$(P)$(R)INENC$(ENC_IND):SCALE PP")
+  field(OUT,  "$(P)$(R)SCALE PP")
   field(PREC, "4")
 }
 
-record(calcout, "$(P)$(R)INENC$(ENC_IND):OFFCALC") {
+record(calcout, "$(P)$(R)OFFCALC") {
   field(CALC, "A")
   field(INPA, "$(MOTOR).OFF CP")
-  field(OUT,  "$(P)$(R)INENC$(ENC_IND):OFF PP")
+  field(OUT,  "$(P)$(R)OFF PP")
   field(PREC, "4")
 }
 
-record(stringout, "$(P)$(R)INENC$(ENC_IND):UNITSCALC") {
-  field(OUT,  "$(P)$(R)INENC$(ENC_IND):UNITS PP")
+record(stringout, "$(P)$(R)UNITSCALC") {
+  field(OUT,  "$(P)$(R)UNITS PP")
   field(DOL, "$(MOTOR).EGU CP")
   field(OMSL, "closed_loop")
 }
 
-record(calcout, "$(P)$(R)INENC$(ENC_IND):ONHOMED") {
+record(calcout, "$(P)$(R)ONHOMED") {
   field(DESC, "Trigger seq when motor has been homed")
   field(CALC, "A=0")
   field(INPA, "$(MOTOR):HOMING CP")
   field(OOPT, "Transition To Non-zero")
-  field(OUT, "$(P)$(R)INENC$(ENC_IND):ONENABLE.PROC")
+  field(OUT, "$(P)$(R)ONENABLE.PROC")
   field(VAL, "1")
 }
 
-record(seq, "$(P)$(R)INENC$(ENC_IND):ONENABLE") {
+record(seq, "$(P)$(R)ONENABLE") {
   field(DESC, "Calibrate pos after home with delay")
   field(DOL1, "1")
-  field(LNK1, "$(P)$(R)INENC$(ENC_IND):SETPOSCALC.PROC PP")
+  field(LNK1, "$(P)$(R)SETPOSCALC.PROC PP")
   field(DLY1, "$(HOMESETTLE=5)")
 }
 
 # % archiver 10 Monitor
-record(calcout, "$(P)$(R)INENC$(ENC_IND):SETPOSCALC") {
+record(calcout, "$(P)$(R)SETPOSCALC") {
   field(CALC, "A*(B>0?B:1)*C")
   field(INPA, "$(MOTOR).REP") #WRITES TO THE MOTOR RECORD VAL IN COUNTS INSTEAD OF :RBV
   field(INPB, "$(MOTOR):SCALE")
   field(INPC, "$(DIR=+)1")
-  field(OUT, "$(P)$(R)INENC$(ENC_IND):SETPOS PP")
+  field(OUT, "$(P)$(R)SETPOS PP")
 }
 
-record(longout, "$(P)$(R)INENC$(ENC_IND):SETPOS") {
+record(longout, "$(P)$(R)SETPOS") {
   field(DESC, "INENC set current position")
   field(DTYP, "asynInt32")
-  field(OUT, "@asyn($(PORT),0)INENC$(ENC_IND):SETPOS")
+  field(OUT, "@asyn($(PORT),0)INENC$(ADDR):SETPOS")
   info(asyn:READBACK, "1")
 }
 
-record(ao, "$(P)$(R)INENC$(ENC_IND):SCALE") {
+record(ao, "$(P)$(R)SCALE") {
   field(DESC, "INENC scale value")
   field(DTYP, "asynFloat64")
-  field(OUT, "@asyn($(PORT),0)INENC$(ENC_IND):SCALE")
+  field(OUT, "@asyn($(PORT),0)INENC$(ADDR):SCALE")
 }
 
-record(ao, "$(P)$(R)INENC$(ENC_IND):OFF") {
+record(ao, "$(P)$(R)OFF") {
   field(DESC, "INENC offset value")
   field(DTYP, "asynFloat64")
-  field(OUT, "@asyn($(PORT),0)INENC$(ENC_IND):OFF")
+  field(OUT, "@asyn($(PORT),0)INENC$(ADDR):OFF")
 }
 
-record(stringout, "$(P)$(R)INENC$(ENC_IND):UNITS") {
+record(stringout, "$(P)$(R)UNITS") {
   field(DESC, "INENC units")
   field(DTYP, "asynOctetWrite")
-  field(OUT, "@asyn($(PORT),0)INENC$(ENC_IND):UNITS")
+  field(OUT, "@asyn($(PORT),0)INENC$(ADDR):UNITS")
 }
 
 # Set embedded screen type to read-only
-record(longout, "$(P)$(R)INENC$(ENC_IND):SCREENTYPE") {
+record(longout, "$(P)$(R)SCREENTYPE") {
   field(DESC, "INENC screen type")
   field(DTYP, "asynInt32")
-  field(OUT, "@asyn($(PORT),0)INENC$(ENC_IND):SCREENTYPE")
+  field(OUT, "@asyn($(PORT),0)INENC$(ADDR):SCREENTYPE")
   field(VAL, "$(READONLY=1)")
   field(PINI, "YES")
 }
 
 # Trigger manual calibration of encoder position
-record(longout, "$(P)$(R)INENC$(ENC_IND):CALIBRATE") {
+record(longout, "$(P)$(R)CALIBRATE") {
   field(DESC, "Trigger encoder calibration")
   field(DTYP, "asynInt32")
-  field(OUT, "@asyn($(PORT),0)INENC$(ENC_IND):CALIBRATE")
-  field(FLNK, "$(P)$(R)INENC$(ENC_IND):SETPOSCALC.PROC PP")
+  field(OUT, "@asyn($(PORT),0)INENC$(ADDR):CALIBRATE")
+  field(FLNK, "$(P)$(R)SETPOSCALC.PROC PP")
   info(asyn:READBACK, "1")
  }
 
  # Underlying motor name
-record (stringout, "$(P)$(R)INENC$(ENC_IND):MOTORNAME") {
+record (stringout, "$(P)$(R)MOTORNAME") {
   field(DESC, "Name of motor")
   field(DTYP, "asynOctetWrite")
-  field(OUT, "@asyn($(PORT),0)INENC$(ENC_IND):MOTORNAME")
+  field(OUT, "@asyn($(PORT),0)INENC$(ADDR):MOTORNAME")
   field(VAL, "$(MOTOR)")
   field(PINI, "YES")
 }

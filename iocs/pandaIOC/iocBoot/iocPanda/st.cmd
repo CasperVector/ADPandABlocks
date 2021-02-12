@@ -1,34 +1,24 @@
-#!../../bin/linux-x86_64/panda
-
 < envPaths
+errlogInit(20000)
 
-cd "${TOP}"
+dbLoadDatabase "$(TOP)/dbd/pandaApp.dbd"
+pandaApp_registerRecordDeviceDriver(pdbbase)
 
-## Change this to point to your PandA device
-epicsEnvSet("PANDA_ADDRESS","192.168.1.11")
+epicsEnvSet("PREFIX", "PANDA1:")
+epicsEnvSet("PANDAADDR", "172.23.252.202")
+epicsEnvSet("PANDAPTS", "100000")
+epicsEnvSet("QSIZE", "128")
+epicsEnvSet("PORT", "PANDA1")
+epicsEnvSet("EPICS_DB_INCLUDE_PATH", "$(ADCORE)/db:$(ADPANDABLOCKS)/db")
 
-## Register all support components
-dbLoadDatabase "dbd/panda.dbd"
-panda_registerRecordDeviceDriver pdbbase
+drvAsynIPPortConfigure("$(PORT)_CTRL", "$(PANDAADDR):8888")
+drvAsynIPPortConfigure("$(PORT)_DATA", "$(PANDAADDR):8889")
+ADPandABlocksConfig("$(PORT)", "$(PANDAADDR)", $(PANDAPTS), 0, 0)
+dbLoadRecords("ADPandABlocks.template", "P=$(PREFIX),R=cam1:,PORT=$(PORT),ADDR=0,TIMEOUT=1")
+NDFileHDF5Configure("FileHDF1", $(QSIZE), 0, "$(PORT)", 0)
+dbLoadRecords("NDFileHDF5.template", "P=$(PREFIX),R=HDF1:,PORT=FileHDF1,ADDR=0,TIMEOUT=1,XMLSIZE=2048,NDARRAY_PORT=$(PORT)")
 
-## Create asyn ports connected to PandA device
-drvAsynIPPortConfigure("PANDA1.DRV_CTRL", "${PANDA_ADDRESS}:8888", 100, 0, 0)
-drvAsynIPPortConfigure("PANDA1.DRV_DATA", "${PANDA_ADDRESS}:8889", 100, 0, 0)
+cd "$(TOP)/iocBoot/$(IOC)"
+dbLoadTemplate("panda-posbus.substitutions", "P=$(PREFIX),PORT=$(PORT)")
+iocInit()
 
-## Configure ADPandABlocks areaDetector plugin to control acquisition from the PandA
-ADPandABlocksConfig("PANDA1.DRV", "${PANDA_ADDRESS}", 100000, 1000, 0, 0)
-
-## Configure NDAttrPlot areaDetector plugin 
-NDAttrPlotConfig("PANDA1.PLT", 198, 10000, 9, "PANDA1.DRV", 0, 10000, 0)
-
-## Configure NDPos areaDetector plugin 
-NDPosPluginConfigure("PANDA1.POS", 10000, 0, "PANDA1.DRV", 0, 0, 0, 0, 0)
-
-## Configure HDF5 areaDetector plugin 
-NDFileHDF5Configure("PANDA1.HDF", 10000, 0, "PANDA1.POS", 0)
-
-## Load record instances
-dbLoadRecords "db/panda.db"
-
-cd "${TOP}/iocBoot/${IOC}"
-iocInit
