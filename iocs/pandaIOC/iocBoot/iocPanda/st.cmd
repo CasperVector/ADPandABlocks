@@ -16,8 +16,8 @@ epicsEnvSet "EPICS_TS_MIN_WEST", '0'
 
 cd "$(INSTALL)"
 
-dbLoadDatabase "dbd/example.dbd"
-example_registerRecordDeviceDriver(pdbbase)
+dbLoadDatabase "dbd/pandaApp.dbd"
+pandaApp_registerRecordDeviceDriver(pdbbase)
 
 drvAsynIPPortConfigure("PANDA.DRV_CTRL", "172.23.252.202:8888", 100, 0, 0)
 
@@ -34,5 +34,5 @@ NDFileHDF5Configure("PANDA.HDF", 100, 0, "PANDA.DRV", 0, 0, 0)
 # Final ioc initialisation
 # ------------------------
 cd "$(INSTALL)"
-dbLoadRecords 'db/example_expanded.db'
+dbLoadRecords 'db/pandaApp.db'
 iocInit

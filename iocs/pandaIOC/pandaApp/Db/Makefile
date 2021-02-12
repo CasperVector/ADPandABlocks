@@ -11,7 +11,7 @@ include $(TOP)/configure/CONFIG
 # Create and install (or just install)
 # databases, templates, substitutions like this
 
-DB += example_expanded.db
+DB += pandaApp.db
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
