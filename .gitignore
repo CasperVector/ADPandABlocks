@@ -6,8 +6,6 @@ O.*
 .project
 RemoteSystemsTempFiles/
 bin/
-iocs/
-documentation/
 data/
 db/
 dbd/
