@@ -12,9 +12,6 @@ include $(TOP)/configure/CONFIG
 # databases, templates, substitutions like this
 
 DB += ADPandABlocks.template
-DB += ADPandABlocksPosBus.template
-DB += ADPandABlocksMotorSync.template
-DB += ADPandABlocks_detail.template
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add

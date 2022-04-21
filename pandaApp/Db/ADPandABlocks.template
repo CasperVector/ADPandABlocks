@@ -10,9 +10,6 @@
 # % gui, $(PORT), edmtab, ADPandABlocksDetector.edl, P=$(P), R=$(R), DEVICE=$(P)$(R)
 #====================================================================#
 
-# CSS screen
-include "ADPandABlocks_detail.template"
-
 include "ADBase.template"
 
 record(bi, "$(P)$(R)CONNECTED") {

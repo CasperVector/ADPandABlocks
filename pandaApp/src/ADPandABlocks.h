@@ -58,7 +58,7 @@ public:
     enum motorField {scale, offset, units, setpos, screen, motorName};
 
 public:
-    ADPandABlocks(const char *portName, const char* pandaAddress, int maxPts, int maxBuffers, int maxMemory);
+    ADPandABlocks(const char *portName, const char* pandaAddress, int maxBuffers, int maxMemory);
     // virtual ~ADPandABlocks();
     /** These should be private, but get called from C, so must be public */
     void readDataPort();

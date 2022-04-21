@@ -65,7 +65,7 @@ static const char *driverName = "ADPandABlocks";
 static std::map<asynStatus, std::string> errorMsg;
 
 
-ADPandABlocks::ADPandABlocks(const char* portName, const char* pandaAddress, int maxPts, int maxBuffers, int maxMemory) :
+ADPandABlocks::ADPandABlocks(const char* portName, const char* pandaAddress, int maxBuffers, int maxMemory) :
         ADDriver(portName, 1 /*maxAddr*/, NUM_PARAMS, maxBuffers, maxMemory,
                  asynInt8ArrayMask | asynFloat64ArrayMask | asynInt32Mask | asynFloat64Mask | asynOctetMask | asynDrvUserMask,
                  asynInt8ArrayMask | asynFloat64ArrayMask | asynInt32Mask | asynFloat64Mask | asynOctetMask,
@@ -1827,8 +1827,8 @@ asynStatus ADPandABlocks::writeOctet(asynUser *pasynUser, const char* value, siz
 }
 
 
-extern "C" int ADPandABlocksConfig(const char *portName, const char* pandaAddress, int maxPts, int maxBuffers, int maxMemory) {
-    new ADPandABlocks(portName, pandaAddress, maxPts, maxBuffers, maxMemory);
+extern "C" int ADPandABlocksConfig(const char *portName, const char* pandaAddress, int maxBuffers, int maxMemory) {
+    new ADPandABlocks(portName, pandaAddress, maxBuffers, maxMemory);
     return (asynSuccess);
 }
 
@@ -1836,14 +1836,13 @@ extern "C" int ADPandABlocksConfig(const char *portName, const char* pandaAddres
 /** Code for iocsh registration */
 static const iocshArg ADPandABlocksConfigArg0 = { "Port name", iocshArgString };
 static const iocshArg ADPandABlocksConfigArg1 = { "Panda address", iocshArgString };
-static const iocshArg ADPandABlocksConfigArg2 = { "Max number of points to capture in position compare", iocshArgInt };
-static const iocshArg ADPandABlocksConfigArg3 = { "maxBuffers for areaDetector", iocshArgInt };
-static const iocshArg ADPandABlocksConfigArg4 = { "maxMemory for areaDetector", iocshArgInt };
+static const iocshArg ADPandABlocksConfigArg2 = { "maxBuffers for areaDetector", iocshArgInt };
+static const iocshArg ADPandABlocksConfigArg3 = { "maxMemory for areaDetector", iocshArgInt };
 static const iocshArg* const ADPandABlocksConfigArgs[] = { &ADPandABlocksConfigArg0,
-                                                           &ADPandABlocksConfigArg1, &ADPandABlocksConfigArg2, &ADPandABlocksConfigArg3, &ADPandABlocksConfigArg4 };
-static const iocshFuncDef configADPandABlocks = { "ADPandABlocksConfig", 5, ADPandABlocksConfigArgs };
+                                                           &ADPandABlocksConfigArg1, &ADPandABlocksConfigArg2, &ADPandABlocksConfigArg3 };
+static const iocshFuncDef configADPandABlocks = { "ADPandABlocksConfig", 4, ADPandABlocksConfigArgs };
 static void configADPandABlocksCallFunc(const iocshArgBuf *args) {
-    ADPandABlocksConfig(args[0].sval, args[1].sval, args[2].ival, args[3].ival, args[4].ival);
+    ADPandABlocksConfig(args[0].sval, args[1].sval, args[2].ival, args[3].ival);
 }
 
 
