@@ -62,7 +62,6 @@ public:
     // virtual ~ADPandABlocks();
     /** These should be private, but get called from C, so must be public */
     void readDataPort();
-    void pollCommandPort();
 
     const char *ctrlPort;
     const char *dataPort;
@@ -78,8 +77,6 @@ public:
 
     /* These are the methods that we override from asynPortDriver */
     virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
-    virtual asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
-    virtual asynStatus writeOctet(asynUser *pasynUser, const char* value, size_t nChars, size_t* nActual);
 
     void exceptionCallback(asynUser *pasynUser, asynException exception);
 protected:
@@ -129,25 +126,10 @@ private:
     bool posBusInUse(std::string posBusName);
     void createLookup(std::string paramName, std::string paramNameEnd, int* paramInd, int posBusInd);
     std::vector<std::string> stringSplit(const std::string& s, char delimiter);
-    void processChanges(std::string cmd, bool posn);
     void updateScaledPositionValue(std::string posBusName);
     int getEncoderNumberFromName(std::string posBusName);
     void calibrateEncoderPosition(int encoderNumer);
     void setEncoderPosition(int encoderNumer, int value);
-    void setPandASetPos(std::string posBusName, int value);
-    bool checkIfMotorFloatParams(int reason, double value);
-    bool checkIfReasonIsMotorOffset(int reason, double value);
-    bool checkIfReasonIsMotorScale(int reason, double value);
-    bool checkIfReasonIsMotorUnit(int reason, std::string value);
-    bool checkIfReasonIsMotorSetpos(int reason, int value);
-    bool checkIfReasonIsMotorScreenType(int reason, int value);
-    bool checkIfReasonIsMotorName(int reason, std::string name);
-    template<typename T>
-    void updatePandAParam(std::string name, std::string field, T value);
-    template<typename T>
-    void updatePandAMotorParam(int motorIndex, motorField field, T value);
-    template<typename T>
-    asynStatus UpdateLookupTableParamFromWrite(int param, T value);
     double stringToDouble(std::string str);
     int stringToInteger(std::string str);
     std::string doubleToString(double value);
