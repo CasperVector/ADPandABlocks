@@ -320,7 +320,7 @@ void ADPandABlocks::readDataPort() {
                     header.append(rxBuffer);
                     header.append("\n");
                     if (strcmp(rxBuffer, "</header>\0") == 0) {
-                        headerValues = parseHeader(header);
+                        parseHeader(header);
                         // Read the last line of the header
                         status = readHeaderLine(rxBuffer, N_BUFF_DATA, lastHeaderErrorTime);
                         if(status == asynError){
@@ -413,14 +413,14 @@ void ADPandABlocks::readDataPort() {
 }
 
 
-ADPandABlocks::headerMap ADPandABlocks::parseHeader(const std::string& headerString)
+asynStatus ADPandABlocks::parseHeader(const std::string& headerString)
 {
     /**return a map containing the header data corresponding to each xml node
      * the first map will always be the 'data' node,
      * then each field will be pushed onto the vector sequentially
      */
     std::map<std::string, std::string> tmpValues;
-    headerMap tmpHeaderValues;
+    std::vector<std::map<std::string, std::string> > tmpHeaderValues;
 
     //set the header parameter
     setStringParam(ADPandABlocksHeader, headerString.c_str());
@@ -485,7 +485,7 @@ ADPandABlocks::headerMap ADPandABlocks::parseHeader(const std::string& headerStr
     }
 
     callParamCallbacks();
-    return tmpHeaderValues;
+    return status;
 }
 
 
@@ -534,7 +534,7 @@ void ADPandABlocks::getAllData(std::vector<char>& inBuffer, const int dataLen, c
 
 void ADPandABlocks::parseData(std::vector<char> dataBuffer, const int dataLen){
     int buffLen = dataBuffer.size(); //actual length of received input data stream (could be multiple lines)
-    int dataNo = headerValues.size() - 1; //number of received data points (total header fields - 'data' = number of captured fields)
+    int dataNo = headerArraySize - 1; //number of received data points (total header fields - 'data' = number of captured fields)
     //check to see if we have read all the data in, and do another read if we haven't
     if(dataLen > buffLen)
     {
@@ -591,7 +591,7 @@ void ADPandABlocks::outputData(const int dataLen, const int dataNo, const std::v
                     //from the header and assign the appropriate pointer.
 
                     if(typeArray[i+1] == 1) {
-                        // Create the NDAttributes and initialise them with data value (headerValue[0] is the data info)
+                        // Create the NDAttributes and initialise them with data value
                         if(writeAttributes) {
                             pArray->pAttributeList->add(
                                 (nameCaptArray[i+1]),
@@ -603,7 +603,7 @@ void ADPandABlocks::outputData(const int dataLen, const int dataNo, const std::v
                         ((double *) pArray->pData)[i+(dataNo*numExposuresCounter)] = *(double *) ptridx;
                         ptridx += sizeof(double);
                     } else if (typeArray[i+1] == 2) {
-                        // Create the NDAttributes and initialise them with data value (headerValue[0] is the data info)
+                        // Create the NDAttributes and initialise them with data value
                         if(writeAttributes) {
                             pArray->pAttributeList->add(
                                     (nameCaptArray[i+1]),
@@ -648,7 +648,7 @@ void ADPandABlocks::allocateFrame() {
         pArray = NULL;
     }
     // Allocate a new NDArray
-    int arraysize = headerValues.size() -1;
+    int arraysize = headerArraySize - 1;
     size_t dims[2];
     int nDims = 2;
     dims[0] = arraysize;

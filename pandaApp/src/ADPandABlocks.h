@@ -33,11 +33,6 @@
 #define LONGWAIT 1000.0
 
 class ADPandABlocks: public ADDriver {
-private:
-    /**Typedefs**/
-    //vector of maps to store header data. Each map is for an individual xml node
-    typedef std::vector<std::map<std::string, std::string> > headerMap;
-
 public:
     ADPandABlocks(const char *portName, const char* pandaAddress, int maxBuffers, int maxMemory);
     // virtual ~ADPandABlocks();
@@ -71,7 +66,7 @@ protected:
 #define NUM_PARAMS (&LAST_PARAM - &FIRST_PARAM + 1)
 
 private:
-    headerMap parseHeader(const std::string& headerString);
+    asynStatus parseHeader(const std::string& headerString);
     void parseData(std::vector<char> dataBuffer, const int dataLen);
     void allocateFrame();
     void wrapFrame();
@@ -92,8 +87,6 @@ private:
     asynOctet *pasynOctet_data;
     void *octetPvt_data;
     int arrayCounter, numImagesCounter, numExposures,numExposuresCounter, imgMode, imgNo;
-    //vector of maps for the header values
-    headerMap headerValues;
     // Important header information stored in arrays for efficiency.
     int typeArray[1024];
     char* nameCaptArray[1024];
