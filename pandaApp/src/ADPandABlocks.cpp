@@ -78,25 +78,6 @@ ADPandABlocks::ADPandABlocks(const char* portName, const char* pandaAddress, int
     errorMsg[asynDisconnected] = "asynDisconnected";
     errorMsg[asynDisabled] = "asynDisabled";
 
-    captureType["No"] = 0;
-    captureType["Value"] = 1;
-    captureType["Diff"] = 2;
-    captureType["Sum"] = 3;
-    captureType["Mean"] = 4;
-    captureType["Min"] = 5;
-    captureType["Max"] = 6;
-    captureType["Min Max"] = 7;
-    captureType["Min Max Mean"] = 8;
-    captureStrings.push_back("No");
-    captureStrings.push_back("Value");
-    captureStrings.push_back("Diff");
-    captureStrings.push_back("Sum");
-    captureStrings.push_back("Mean");
-    captureStrings.push_back("Min");
-    captureStrings.push_back("Max");
-    captureStrings.push_back("Min Max");
-    captureStrings.push_back("Min Max Mean");
-
     const char *functionName = "ADPandABlocks";
     asynStatus status = asynSuccess;
     asynInterface *pasynInterface;
@@ -304,22 +285,6 @@ ADPandABlocks::~ADPandABlocks () {
 
 
 /*
- * Get position bus field
- * \param[in] name Bus name
- * \param[in] paramName Parameter name
- * \param[out] field Bus field
- */
-std::string ADPandABlocks::getPosBusField(std::string posbus, const char* paramName){
-    std::string field;
-    std::stringstream cmdStr;
-    cmdStr << posbus << "." << paramName << "?";
-    sendCtrl(cmdStr.str());
-    readPosBusValues(&field);
-    return field;
-}
-
-
-/*
  * Create position bus parameter
  * \param[in] paramName Parameter name
  * \param[in] paramType Parameter type
@@ -439,118 +404,6 @@ std::vector<std::string> ADPandABlocks::readFieldNames(int* numFields) {
     }
     *numFields = i;
     return fieldNameStrings;
-}
-
-
-/*
- * Read position bus values (called from read thread)
- * \param[in] posBusValue 
- * \param[out] status Asyn status for reading from control port 
- */
-asynStatus ADPandABlocks::readPosBusValues(std::string* posBusValue) {
-    const char *functionName = "readPosBusValues";
-    char rxBuffer[N_BUFF_CTRL];
-    size_t nBytesIn;
-    int eomReason;
-    asynStatus status = asynSuccess;
-    status = pasynOctet_ctrl->read(octetPvt_ctrl, pasynUser_ctrl_rx, rxBuffer, N_BUFF_CTRL - 1,
-                                   &nBytesIn, &eomReason);
-    if (eomReason & ASYN_EOM_EOS) {
-        // Replace the terminator with a null so we can use it as a string
-        rxBuffer[nBytesIn] = '\0';
-        asynPrint(pasynUserSelf, ASYN_TRACE_FLOW,
-                  "%s:%s: Message: '%s'\n", driverName, functionName, rxBuffer);
-    } else {
-        asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
-                  "%s:%s: Bad message 'bt%.*s'\n", driverName, functionName, (int)nBytesIn, rxBuffer);
-    }
-
-    if(rxBuffer[0] == 'O' && rxBuffer[1] == 'K')
-    {
-        char* readValue = rxBuffer + 4;
-        posBusValue->assign(readValue);
-    } else {
-        //we didn't recieve OK so something went wrong
-        asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
-                  "%s:%s Bad response: %d, %s\n", driverName, functionName, (int)nBytesIn, rxBuffer);
-        status = asynError;
-    }
-    return status;
-}
-
-
-/*
- * Update the scaled position value
- * \param[in] posBusName Position bus name
- */
-void ADPandABlocks::updateScaledPositionValue(std::string posBusName)
-{
-    double scale, offset;
-    int counts;
-    getDoubleParam(*posBusLookup[posBusName]["SCALE"], &scale);
-    getDoubleParam(*posBusLookup[posBusName]["OFFSET"], &offset);
-    getIntegerParam(*posBusLookup[posBusName]["UNSCALEDVAL"], &counts);
-    setDoubleParam(*posBusLookup[posBusName]["VAL"], counts*scale + offset);
-}
-
-
-/*
- * Convert a string to a double
- * \param[in] str String to convert
- * \param[out] value Value of converted string
- */
-double ADPandABlocks::stringToDouble(std::string str)
-{
-    std::stringstream strStream(str);
-    double value;
-    strStream >> value;
-    return value;
-}
-
-
-/*
- * Convert a string to an integer
- * \param[in] str String to convert
- * \param[out] value Value of converted string
- */
-int ADPandABlocks::stringToInteger(std::string str)
-{
-    std::stringstream strStream(str);
-    int value;
-    strStream >> value;
-    return value;
-}
-
-
-/*
- * Convert a double to a string
- * \param[in] value Double to convert
- * \param[out] string Converted string 
- */
-std::string ADPandABlocks::doubleToString(double value)
-{
-    std::stringstream strStream;
-    strStream << value;
-    return strStream.str();
-}
-
-
-/*
- * Split a string using a delimiter
- * \param[in] s String to split
- * \param[in] delimiter Delimiter to split string with
- * \param[out] tokens Vector of split string components
- */
-std::vector<std::string> ADPandABlocks::stringSplit(const std::string& s, char delimiter)
-{
-    std::vector<std::string> tokens;
-    std::string token;
-    std::istringstream tokenStream(s);
-    while (std::getline(tokenStream, token, delimiter))
-    {
-        tokens.push_back(token);
-    }
-    return tokens;
 }
 
 
@@ -857,21 +710,6 @@ asynStatus ADPandABlocks::extractHeaderData(const xmlTextReaderPtr xmlreader, st
 }
 
 
-std::string ADPandABlocks::getHeaderValue(const int index, const std::string attribute)const
-{
-    /*return the value of an attribute of a given element*/
-    //first check index (do find on headerValues
-    if (headerValues[index].find(attribute) != headerValues[index].end())
-    {
-        return headerValues[index].find(attribute)->second;
-    }
-    else
-    {
-        throw std::out_of_range("attribute not in map");
-    }
-}
-
-
 void ADPandABlocks::getAllData(std::vector<char>& inBuffer, const int dataLen, const int buffLen)const
 {
     const char *functionName = "getAllData";
@@ -1126,63 +964,6 @@ asynStatus ADPandABlocks::send(const std::string txBuffer, asynOctet *pasynOctet
                   "Reconnected to ADPandABlocks\n");
     }
     return status;
-}
-
-
-// Get encoder number from name of position bus
-int ADPandABlocks::getEncoderNumberFromName(std::string posBusName)
-{
-    // Check if encoder
-    std::string encoderStringName("INENC");
-    if (posBusName.find(encoderStringName) != std::string::npos)
-    {
-        // Parse and return encoder number
-        int encoderNumber;
-        std::stringstream encoderNumberSS;
-        encoderNumberSS << posBusName[5];
-        encoderNumberSS >> encoderNumber;
-        return encoderNumber;
-    }
-    else
-    {
-        return -1;
-    }
-
-}
-
-
-// Calibrate encoder position by number (1..4)
-void ADPandABlocks::calibrateEncoderPosition(int encoderNumber)
-{
-    if(encoderNumber > 0 && encoderNumber <= NENC)
-    {
-        // Increment value to cause record to be processed
-        int currentValue;
-        getIntegerParam(ADPandABlocksMCalibrate[encoderNumber-1], &currentValue);
-        setIntegerParam(ADPandABlocksMCalibrate[encoderNumber-1], currentValue + 1);
-    }
-}
-
-
-// Set position of encoder (1..4) to custom value
-void ADPandABlocks::setEncoderPosition(int encoderNumber, int value)
-{
-    if(encoderNumber > 0 && encoderNumber < NENC)
-    {
-        setIntegerParam(ADPandABlocksMSetpos[encoderNumber-1], value);
-    }
-}
-
-
-// Erase substring from string in place
-void ADPandABlocks::removeSubString(std::string &string, std::string &subString)
-{
-    // Search and only remove if it exists in string
-    size_t pos = string.find(subString);
-    if (pos != std::string::npos)
-    {
-        string.erase(pos, subString.length());
-    }
 }
 
 

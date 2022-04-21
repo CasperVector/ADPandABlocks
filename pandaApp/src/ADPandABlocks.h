@@ -116,7 +116,6 @@ private:
     std::vector<std::string> readFieldNames(int* numFields);
     asynStatus readPosBusValues(std::string* posBusValue);
     asynStatus extractHeaderData(const xmlTextReaderPtr xmlreader, std::map<std::string, std::string>& values)const;
-    std::string getHeaderValue(const int index, const std::string attribute)const;
     void getAllData(std::vector<char>& inBuffer, const int dataLen,const  int buffLen)const;
     void outputData(const int dataLen, const int dataNo, const std::vector<char> data);
     asynStatus readHeaderLine(char* rxBuffer, const size_t buffSize, epicsTimeStamp &lastErrorTime)const;
@@ -125,15 +124,6 @@ private:
     std::string getPosBusField(std::string posbus, const char* paramName);
     bool posBusInUse(std::string posBusName);
     void createLookup(std::string paramName, std::string paramNameEnd, int* paramInd, int posBusInd);
-    std::vector<std::string> stringSplit(const std::string& s, char delimiter);
-    void updateScaledPositionValue(std::string posBusName);
-    int getEncoderNumberFromName(std::string posBusName);
-    void calibrateEncoderPosition(int encoderNumer);
-    void setEncoderPosition(int encoderNumer, int value);
-    double stringToDouble(std::string str);
-    int stringToInteger(std::string str);
-    std::string doubleToString(double value);
-    void removeSubString(std::string &string, std::string &subString);    
 private:
     NDArray *pArray;
     asynUser *pasynUser_ctrl_tx;
@@ -161,10 +151,6 @@ private:
 
     //Lookup table for posbus params
     std::map<std::string, std::map<std::string, int*> > posBusLookup;
-
-    //Capture type map
-    std::map<std::string, int> captureType;
-    std::vector<std::string> captureStrings;
 
     //states for readDataTask state machine
     enum readState{waitHeaderStart, waitHeaderEnd, waitDataStart, receivingData, dataEnd,};
