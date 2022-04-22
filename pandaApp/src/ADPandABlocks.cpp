@@ -1,7 +1,7 @@
 // BK: const modifiers on input parameters and methods are missing
-// BK: Prefer const references in params instead of pointers where the passed 
+// BK: Prefer const references in params instead of pointers where the passed
 //     objects are not changed, references if the memory position of the object
-//     is not changed in method (the reference cannot be null), pointers are 
+//     is not changed in method (the reference cannot be null), pointers are
 //     usually reserved for output parameters
 
 #include "ADPandABlocks.h"
@@ -23,18 +23,15 @@
 //#include <unistd.h>
 #include <cstdlib>
 
-
 static void pollDataPortC(void *userPvt) {
     ADPandABlocks *pPvt = (ADPandABlocks *) userPvt;
     pPvt->readDataPort();
 }
 
-
 static void callbackC(asynUser *pasynUser, asynException exception){
     ADPandABlocks *pPvt = (ADPandABlocks *) pasynUser->drvUser;
     pPvt->exceptionCallback(pasynUser, exception);
 }
-
 
 void ADPandABlocks::exceptionCallback(asynUser *pasynUser, asynException exception){
     int port_connected = 0;
@@ -51,13 +48,10 @@ void ADPandABlocks::exceptionCallback(asynUser *pasynUser, asynException excepti
     }
 }
 
-
 typedef int static_assert_endianness[EPICS_BYTE_ORDER != EPICS_ENDIAN_BIG ? 1 : -1];
-
 
 static const char *driverName = "ADPandABlocks";
 static std::map<asynStatus, std::string> errorMsg;
-
 
 ADPandABlocks::ADPandABlocks(const char* portName, const char* pandaAddress, int maxBuffers, int maxMemory) :
         ADDriver(portName, 1 /*maxAddr*/, NUM_PARAMS, maxBuffers, maxMemory,
@@ -147,9 +141,9 @@ ADPandABlocks::ADPandABlocks(const char* portName, const char* pandaAddress, int
     pasynOctet_ctrl->flush(octetPvt_ctrl, pasynUser_ctrl_tx);
     pasynOctet_ctrl->setInputEos(octetPvt_ctrl, pasynUser_ctrl_tx, "\n", 1);
     pasynOctet_ctrl->setOutputEos(octetPvt_ctrl, pasynUser_ctrl_tx, "\n", 1);
-    
+
     // duplicate port & set timeout
-    
+
     pasynUser_ctrl_rx = pasynManager->duplicateAsynUser(pasynUser_ctrl_tx, 0, 0);
     pasynUser_ctrl_rx->timeout = 3.0;
 
@@ -191,7 +185,7 @@ ADPandABlocks::ADPandABlocks(const char* portName, const char* pandaAddress, int
     /*set the receiving format on the data channel*/
     sendReceivingFormat();
 
-    /* Create thread to monitor data port */ 
+    /* Create thread to monitor data port */
     if (epicsThreadCreate("ADPandABlocksPollDataPort", epicsThreadPriorityMedium,
                           epicsThreadGetStackSize(epicsThreadStackMedium),
                           (EPICSTHREADFUNC) pollDataPortC, this) == NULL) {
@@ -201,19 +195,16 @@ ADPandABlocks::ADPandABlocks(const char* portName, const char* pandaAddress, int
     }
 };
 
-
 /*
 ADPandABlocks::~ADPandABlocks () {
     pandaResponsive = false;
 }
 */
 
-
 asynStatus ADPandABlocks::sendReceivingFormat() {
 
     return sendData("XML FRAMED SCALED\n");
 }
-
 
 asynStatus ADPandABlocks::readHeaderLine(char* rxBuffer, const size_t buffSize, epicsTimeStamp &lastErrorTime) const {
     /*buffSize is the size fo rxBuffer*/
@@ -248,7 +239,6 @@ asynStatus ADPandABlocks::readHeaderLine(char* rxBuffer, const size_t buffSize, 
     return status;
 }
 
-
 asynStatus ADPandABlocks::readDataBytes(char* rxBuffer, const size_t nBytes, bool &responsive) const {
     const char *functionName = "readDataBytes";
     int eomReason;
@@ -275,7 +265,6 @@ asynStatus ADPandABlocks::readDataBytes(char* rxBuffer, const size_t nBytes, boo
     }
     return status;
 }
-
 
 /*this function reads from the data port*/
 void ADPandABlocks::readDataPort() {
@@ -412,7 +401,6 @@ void ADPandABlocks::readDataPort() {
     callParamCallbacks();
 }
 
-
 asynStatus ADPandABlocks::parseHeader(const std::string& headerString)
 {
     /**return a map containing the header data corresponding to each xml node
@@ -488,7 +476,6 @@ asynStatus ADPandABlocks::parseHeader(const std::string& headerString)
     return status;
 }
 
-
 asynStatus ADPandABlocks::extractHeaderData(const xmlTextReaderPtr xmlreader, std::map<std::string, std::string>& values)const
 {
     /*Get the attribute values for a node and place in the map values*/
@@ -511,7 +498,6 @@ asynStatus ADPandABlocks::extractHeaderData(const xmlTextReaderPtr xmlreader, st
     return asynSuccess;
 }
 
-
 void ADPandABlocks::getAllData(std::vector<char>& inBuffer, const int dataLen, const int buffLen)const
 {
     const char *functionName = "getAllData";
@@ -522,7 +508,7 @@ void ADPandABlocks::getAllData(std::vector<char>& inBuffer, const int dataLen, c
     // asynUser *pasynUserRead = pasynManager->duplicateAsynUser(pasynUser_data, 0, 0);
     char rxBuffer[readBytes];
     status = pasynOctet_data->read(octetPvt_data, pasynUser_data, rxBuffer, readBytes,
-                                   &nBytesIn, &eomReason);    
+                                   &nBytesIn, &eomReason);
     inBuffer.insert(inBuffer.end(), rxBuffer, rxBuffer+nBytesIn);
     if(status)
     {
@@ -530,7 +516,6 @@ void ADPandABlocks::getAllData(std::vector<char>& inBuffer, const int dataLen, c
                   driverName, functionName, status);
     }
 }
-
 
 void ADPandABlocks::parseData(std::vector<char> dataBuffer, const int dataLen){
     int buffLen = dataBuffer.size(); //actual length of received input data stream (could be multiple lines)
@@ -542,7 +527,6 @@ void ADPandABlocks::parseData(std::vector<char> dataBuffer, const int dataLen){
     }
     outputData(dataLen, dataNo, dataBuffer);
 }
-
 
 void ADPandABlocks::outputData(const int dataLen, const int dataNo, const std::vector<char> data)
 {
@@ -633,13 +617,11 @@ void ADPandABlocks::outputData(const int dataLen, const int dataNo, const std::v
             linecount++;
             //callParamCallbacks();
         }
-
     }
     catch(const std::out_of_range& e){
         //if attribute is not in header map, go back to beginning ?
     }
 }
-
 
 void ADPandABlocks::allocateFrame() {
     // Release the old NDArray if it exists
@@ -659,7 +641,6 @@ void ADPandABlocks::allocateFrame() {
         pArray->pAttributeList->clear();
     }
 }
-
 
 void ADPandABlocks::wrapFrame() {
     this->lock();
@@ -704,7 +685,6 @@ void ADPandABlocks::wrapFrame() {
     }
 }
 
-
 /* Send helper function
  * called with lock taken
  */
@@ -713,12 +693,10 @@ asynStatus ADPandABlocks::sendData(const std::string txBuffer){
     return status;
 }
 
-
 asynStatus ADPandABlocks::sendCtrl(const std::string txBuffer){
     asynStatus status = send(txBuffer, pasynOctet_ctrl, octetPvt_ctrl, pasynUser_ctrl_tx);
     return status;
 }
-
 
 asynStatus ADPandABlocks::send(const std::string txBuffer, asynOctet *pasynOctet, void* octetPvt, asynUser* pasynUser) {
     const char *functionName = "send";
@@ -748,7 +726,6 @@ asynStatus ADPandABlocks::send(const std::string txBuffer, asynOctet *pasynOctet
     }
     return status;
 }
-
 
 /** Called when asyn clients call pasynInt32->write().
  * This function performs actions for some parameters
@@ -804,12 +781,10 @@ asynStatus ADPandABlocks::writeInt32(asynUser *pasynUser, epicsInt32 value)
     return status;
 }
 
-
 extern "C" int ADPandABlocksConfig(const char *portName, const char* pandaAddress, int maxBuffers, int maxMemory) {
     new ADPandABlocks(portName, pandaAddress, maxBuffers, maxMemory);
     return (asynSuccess);
 }
-
 
 /** Code for iocsh registration */
 static const iocshArg ADPandABlocksConfigArg0 = { "Port name", iocshArgString };
@@ -823,11 +798,9 @@ static void configADPandABlocksCallFunc(const iocshArgBuf *args) {
     ADPandABlocksConfig(args[0].sval, args[1].sval, args[2].ival, args[3].ival);
 }
 
-
 static void ADPandABlocksRegister(void) {
     iocshRegister(&configADPandABlocks, configADPandABlocksCallFunc);
 }
-
 
 extern "C" {
 epicsExportRegistrar(ADPandABlocksRegister);

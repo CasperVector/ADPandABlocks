@@ -59,7 +59,7 @@ public:
 protected:
 #define FIRST_PARAM ADPandABlocksIsConnected
     int ADPandABlocksIsConnected;        // int32 read  - is ADPandABlocks connected?
-    int ADPandABlocksIsResponsive;       // int32 read  - is ADPandABlocks responsive ?
+    int ADPandABlocksIsResponsive;       // int32 read  - is ADPandABlocks responsive?
     int ADPandABlocksHeader;             // string read - data header
     int ADPandABlocksDataEnd;            // string read - end of data string
 #define LAST_PARAM ADPandABlocksDataEnd
@@ -87,13 +87,13 @@ private:
     asynOctet *pasynOctet_data;
     void *octetPvt_data;
     int arrayCounter, numImagesCounter, numExposures,numExposuresCounter, imgMode, imgNo;
-    // Important header information stored in arrays for efficiency.
+    // Important header information stored in arrays for efficiency
     int typeArray[1024];
     char* nameCaptArray[1024];
     int headerArraySize;
     int setLen;
 
-    //states for readDataTask state machine
+    // States for readDataTask state machine
     enum readState{waitHeaderStart, waitHeaderEnd, waitDataStart, receivingData, dataEnd,};
     readState state; //init state for the data read
     asynStatus sendReceivingFormat() ;
